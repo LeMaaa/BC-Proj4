@@ -88,27 +88,36 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public byte[] getBlockchainData() {
-        return new byte[0];
+        if(this.blocks == null || this.blocks.size() == 0) return new byte[0];
+        StringBuilder sb = new StringBuilder();
+        for(Block b : this.blocks) {
+            sb.append(b.toString());
+            sb.append("@");
+        }
+        return sb.toString().getBytes();
     }
 
     @Override
     // call getBlockChainDataFromPeer inside node class.
     public void downloadBlockchain() {
-        byte[] longestBlockChain = null;
-        long maxLen = 0;
+        String[] longestBlockChain = new String[0];
+        int maxLen = 0;
         for(int i = 0; i < node.getPeerNumber(); i++) {
+            if(i == this.id) continue;
             try {
-                byte[] cur = node.getBlockChainDataFromPeer(i);
-                if(cur.length > maxLen) {
-                    maxLen = cur.length;
-                    longestBlockChain = cur;
-                }else if(cur.length == maxLen) {
-                    List<Block> preLongestBlockChain = SerializationUtils.deserialize(longestBlockChain);
-                    List<Block> curBlockChain = SerializationUtils.deserialize(cur);
+                byte[] curByte = node.getBlockChainDataFromPeer(i);
+                String curString = new String(curByte);
+                String[] peerBlocks = curString.split("@");
+                if(peerBlocks.length > maxLen) {
+                    maxLen = peerBlocks.length;
+                    longestBlockChain = peerBlocks;
+                }else if(peerBlocks.length == maxLen) {
+                    Block lastBlockForCurMax = Block.fromString(longestBlockChain[longestBlockChain.length - 1]);
+                    Block lastBlockForPeer = Block.fromString(peerBlocks[peerBlocks.length - 1]);
                     // we want to choose the block containing the earliest timestamp.
-                    if(preLongestBlockChain.get(preLongestBlockChain.size() - 1).getTimestamp()
-                            > curBlockChain.get(curBlockChain.size() - 1).getTimestamp()) {
-                        longestBlockChain = cur;
+                    if(lastBlockForCurMax.getTimestamp()
+                            > lastBlockForPeer.getTimestamp()) {
+                        longestBlockChain = peerBlocks;
                     }
                 }
             }catch (RemoteException e) {
@@ -116,6 +125,11 @@ public class BlockChain implements BlockChainBase {
             }
         }
 
+        List<Block> curBlocks = new ArrayList<>();
+        for(String s : longestBlockChain) {
+            curBlocks.add(Block.fromString(s));
+        }
+        this.blocks = curBlocks;
     }
 
     @Override
