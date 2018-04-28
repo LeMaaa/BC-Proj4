@@ -14,19 +14,12 @@ import java.util.Random;
 public class Block implements Serializable{
 
     private String hash;
-
     private String previousHash;
-
     private String data;
-
     private long timestamp;
-
     private int difficulty;
-
     private long nonce;
-
     private BigInteger target;
-
     private POW pow;
 
     public Block() {}
@@ -39,34 +32,23 @@ public class Block implements Serializable{
         this.difficulty = difficulty;
         this.nonce = 0;
         this.target = computeTarget(difficulty);
-//        this.hash = this.computeHash(data, previousHash, timestamp, nonce, difficulty);
     }
 
-
+    public Block( String hash, String previousHash, String data,
+                  long timestamp, int difficulty, int nonce) {
+        this.hash = hash;
+        this.previousHash = previousHash;
+        this.data = data;
+        this.timestamp = timestamp;
+        this.difficulty = difficulty;
+        this.nonce = nonce;
+        this.target = computeTarget(difficulty);
+    }
 
     private BigInteger computeTarget(int difficulty) {
         return  BigInteger.valueOf(1).shiftLeft((256 - difficulty));
 
     }
-
-//    private String computeHash(String data, String previousHash, long timestamp, long nonce, long difficulty){
-//        String preHash = previousHash;
-//        String curData = data;
-//        if( preHash == null || preHash.equals(" ")  || preHash.length() == 0) {
-//            byte[] preHashByte = new byte[32];
-//            new Random().nextBytes(preHashByte);
-//            preHash = new String (preHashByte);
-//        }
-//
-//        if( curData == null || curData.equals("") || curData.length() == 0) {
-//            byte[] dataByte = new byte[32];
-//            new Random().nextBytes(dataByte);
-//            curData = new String (dataByte);
-//        }
-//
-//        byte[] temp = (preHash + curData + Long.toString(timestamp), ).getBytes();
-//        return  new String(DigestUtils.sha256(temp));
-//    }
 
     private String prepareData(long nonce) {
         String preHash = this.previousHash;
@@ -109,14 +91,9 @@ public class Block implements Serializable{
         this.setNonce(nonce);
     }
 
-    public POW getPow() {
-        return this.pow;
-    }
+    public POW getPow() { return this.pow; }
 
-    public long getNonce() {
-
-        return nonce;
-    }
+    public long getNonce() { return nonce; }
 
     public void setNonce(long nonce) {
         this.nonce = nonce;
@@ -152,7 +129,28 @@ public class Block implements Serializable{
 
 
     public static Block fromString(String s){
-        return null;
+
+        String[] arr = s.split("#");
+        Block block = new Block(arr[0], arr[1], arr[2], Long.parseLong(arr[3]), Integer.parseInt(arr[4]), Integer.parseInt(arr[5]));
+        return block;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        // arr[0]
+        sb.append(this.hash).append("#");
+        // arr[1]
+        sb.append(this.previousHash).append("#");
+        // arr[2]
+        sb.append(this.data).append("#");
+        // arr[3]
+        sb.append(this.timestamp).append("#");
+        // arr[4]
+        sb.append(this.difficulty).append("#");
+        // arr[5]
+        sb.append(this.nonce).append("#");
+        return sb.toString();
     }
 
 }
