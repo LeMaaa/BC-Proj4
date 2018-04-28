@@ -7,9 +7,7 @@ import java.util.Random;
 import java.util.List;
 
 import lib.POW;
-import org.apache.*;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.SerializationUtils;
 
 /**
  * Created by lema on 2018/4/26.
@@ -18,17 +16,18 @@ public class BlockChain implements BlockChainBase {
 
     private Block genesisBlock;
     private List<Block> blocks;
-    private int difficulty = 20;
+    private int difficulty;
     private BigInteger target;
     private byte[] blockChain;
     private byte[] newBlockByte;
     private Node node;
     private int id;
 
-    public BlockChain(int id, Node node) {
+    public BlockChain(int id, Node node, int difficulty) {
         this.id = id;
         this.node = node;
         this.blocks = new ArrayList<>();
+        this.difficulty = difficulty;
         this.target = computeTarget(difficulty);
         this.genesisBlock = createGenesisBlock();
         this.blocks.add(this.genesisBlock);
@@ -48,7 +47,10 @@ public class BlockChain implements BlockChainBase {
     @Override
     public Block createGenesisBlock() {
         String data = "This is Genesis Block!";
-        return new Block(getLastBlock().getPreviousHash(), data, System.currentTimeMillis(), this.difficulty);
+        byte[] preHashByte = new byte[32];
+        new Random().nextBytes(preHashByte);
+        Block genesisBlock =  new Block(new String (preHashByte), data, System.currentTimeMillis(), this.difficulty);
+        return genesisBlock;
     }
 
 
@@ -59,7 +61,7 @@ public class BlockChain implements BlockChainBase {
         String preHash =  getLastBlock().getHash();
         Block newBlock = new Block(preHash, data, System.currentTimeMillis(), this.difficulty);
         newBlock.computePOW();
-        byte[] newBlockByte = SerializationUtils.serialize(newBlock);
+        byte[] newBlockByte = newBlock.toString().getBytes();
         this.newBlockByte = newBlockByte;
         return newBlockByte;
     }
@@ -70,6 +72,7 @@ public class BlockChain implements BlockChainBase {
     // you need to call the node’s broadcastNewBlockToPeer method
     public boolean broadcastNewBlock() {
         for(int i = 0; i < node.getPeerNumber(); i++) {
+            if( i == this.id) continue;
             try {
                 if(!node.broadcastNewBlockToPeer(i, this.newBlockByte)) {
                     return false;

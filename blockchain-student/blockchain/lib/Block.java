@@ -1,7 +1,5 @@
 package lib;
 
-import com.sun.deploy.util.StringUtils;
-import com.sun.tools.javac.util.ArrayUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.Serializable;
@@ -21,6 +19,8 @@ public class Block implements Serializable{
     private long nonce;
     private BigInteger target;
     private POW pow;
+
+    private static final long serialVersionUID = 1;
 
     public Block() {}
 
