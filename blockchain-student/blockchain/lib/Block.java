@@ -70,25 +70,23 @@ public class Block implements Serializable{
 
     public void computePOW() {
         long nonce = 0;
-
-        System.out.println("Start mine: " + nonce + "----- ---- ---- ----- -----" );
-
         long index = 0;
         String curHash = "";
         while(index < Long.MAX_VALUE) {
+            System.out.println("Start mine: --- " + index);
             byte[] curData = prepareData(nonce).getBytes();
             curHash = DigestUtils.sha256Hex(curData);
             if(new BigInteger(curHash, 16).compareTo(this.target) == -1) {
-                System.out.println("Found Hash: " + curHash + "--- ---- --- ----");
-                System.out.println("Found Nonce: " + nonce + "--- ---- --- ----");
+                System.out.println("Found Hash: ---  " + curHash);
+                System.out.println("Found Nonce: ---  " + index);
                 break;
             }else {
                 index++;
             }
         }
-        this.pow = new POW(nonce,curHash);
+        this.pow = new POW(index,curHash);
         this.setHash(curHash);
-        this.setNonce(nonce);
+        this.setNonce(index);
     }
 
     public POW getPow() { return this.pow; }

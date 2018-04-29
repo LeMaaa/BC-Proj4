@@ -126,7 +126,9 @@ public class Node implements MessageHandling {
         synchronized (lock) {
             System.out.println(this.blockChainManager);
             int l = blockChainManager.getBlockChainLength();
+            System.out.println("length for node : ---" + l);
             Block last = blockChainManager.getLastBlock();
+            System.out.println("last block" + last);
             return new GetStateReply(l, last.getHash());
         }
     }

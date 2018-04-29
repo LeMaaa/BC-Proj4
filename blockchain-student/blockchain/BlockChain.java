@@ -49,6 +49,7 @@ public class BlockChain implements BlockChainBase {
         String data = "This is Genesis Block!";
         byte[] preHashByte = new byte[32];
         new Random().nextBytes(preHashByte);
+        System.out.println("lastHash for GB --" + new String (preHashByte));
         Block genesisBlock =  new Block(new String (preHashByte), data, System.currentTimeMillis(), this.difficulty);
         return genesisBlock;
     }
