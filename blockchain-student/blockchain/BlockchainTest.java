@@ -18,6 +18,7 @@ public class BlockchainTest {
 
         int numServers = 3;
 
+
         Config cfg = new Config( numServers, controllerPort );
 
         System.out.println( "Testing initial state ..." );
@@ -83,6 +84,7 @@ public class BlockchainTest {
 
         for(int i = 0; i < numServers; i++) {
             GetStateReply rep = cfg.getState(i);
+            System.out.println("rep for" + i +  " : " + " ---" );
 
             int l = rep.length;
             if(l != 2) {
@@ -352,6 +354,7 @@ public class BlockchainTest {
             }
         } catch (Exception e) {
                 e.printStackTrace();
+
         }
     }
 }

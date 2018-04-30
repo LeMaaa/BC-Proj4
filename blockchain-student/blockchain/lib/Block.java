@@ -19,6 +19,7 @@ public class Block implements Serializable{
     private long nonce;
     private BigInteger target;
     private POW pow;
+    private int index;
 
     private static final long serialVersionUID = 1;
 
@@ -50,7 +51,7 @@ public class Block implements Serializable{
 
     }
 
-    private String prepareData(long nonce) {
+    public String prepareData(long nonce) {
         String preHash = this.previousHash;
         String curData = this.data;
         if( preHash == null || preHash.equals(" ")  || preHash.length() == 0) {
@@ -69,12 +70,11 @@ public class Block implements Serializable{
     }
 
     public void computePOW() {
-        long nonce = 0;
         long index = 0;
         String curHash = "";
+        System.out.println("Start mine: --- " + index);
         while(index < Long.MAX_VALUE) {
-            System.out.println("Start mine: --- " + index);
-            byte[] curData = prepareData(nonce).getBytes();
+            byte[] curData = prepareData(index).getBytes();
             curHash = DigestUtils.sha256Hex(curData);
             if(new BigInteger(curHash, 16).compareTo(this.target) == -1) {
                 System.out.println("Found Hash: ---  " + curHash);
@@ -125,29 +125,41 @@ public class Block implements Serializable{
         return timestamp;
     }
 
+    public void setIndex(int index) { this.index = index;}
+
+    public int getIndex() {return this.index;}
+
 
     public static Block fromString(String s){
 
         String[] arr = s.split("#");
+//        System.out.println(arr);
+//        for(String a : arr) {
+//            System.out.println("string in arr : ---" + a);
+//
+//        }
         Block block = new Block(arr[0], arr[1], arr[2], Long.parseLong(arr[3]), Integer.parseInt(arr[4]), Integer.parseInt(arr[5]));
+        block.setIndex(Integer.parseInt(arr[6]));
         return block;
     }
 
     @Override
     public String toString(){
         StringBuilder sb = new StringBuilder();
-        // arr[0]
+        // arr[0]  preHash
         sb.append(this.hash).append("#");
-        // arr[1]
+        // arr[1]  curHash
         sb.append(this.previousHash).append("#");
-        // arr[2]
+        // arr[2]  data
         sb.append(this.data).append("#");
-        // arr[3]
+        // arr[3]  timestamp
         sb.append(this.timestamp).append("#");
-        // arr[4]
+        // arr[4]  difficulty
         sb.append(this.difficulty).append("#");
-        // arr[5]
+        // arr[5]   nonce
         sb.append(this.nonce).append("#");
+        // arr[6]   index
+        sb.append(this.index);
         return sb.toString();
     }
 

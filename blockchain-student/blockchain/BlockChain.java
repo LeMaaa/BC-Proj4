@@ -20,6 +20,7 @@ public class BlockChain implements BlockChainBase {
     private BigInteger target;
     private byte[] blockChain;
     private byte[] newBlockByte;
+    private Block newBlock;
     private Node node;
     private int id;
 
@@ -29,8 +30,7 @@ public class BlockChain implements BlockChainBase {
         this.blocks = new ArrayList<>();
         this.difficulty = difficulty;
         this.target = computeTarget(difficulty);
-        this.genesisBlock = createGenesisBlock();
-        this.blocks.add(this.genesisBlock);
+        this.blocks.add(createGenesisBlock());
     }
 
     private BigInteger computeTarget(int difficulty) {
@@ -41,17 +41,42 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public boolean addBlock(Block block) {
+        System.out.println("Start add new block  --- ");
+        if(isValidNewBlock(block, this.getLastBlock())){
+            System.out.println("new block is validate --- ");
+            this.blocks.add(block);
+            return true;
+        }
+        System.out.println(" add new  block failed --- ");
         return false;
     }
 
     @Override
-    public Block createGenesisBlock() {
+    public synchronized Block createGenesisBlock() {
+        System.out.println("start to init  GB --" );
         String data = "This is Genesis Block!";
-        byte[] preHashByte = new byte[32];
-        new Random().nextBytes(preHashByte);
-        System.out.println("lastHash for GB --" + new String (preHashByte));
-        Block genesisBlock =  new Block(new String (preHashByte), data, System.currentTimeMillis(), this.difficulty);
+        String preHash = computePreHashForGB();
+        System.out.println( "id : "+ id +  " -- preHash for GB --" + preHash);
+        System.out.println("id : "+ id +  "----- ---- ----  --" );
+        System.out.println("id : "+ id + "current Time  for GB --" +  System.currentTimeMillis());
+        System.out.println("id : "+ id + "----- ---- ----  --" );
+        Block genesisBlock = new Block(preHash, data, System.currentTimeMillis(), this.difficulty);
+        String hashForGb = computeHashForGB(genesisBlock);
+        genesisBlock.setHash(hashForGb);
+        genesisBlock.setIndex(0);
+        System.out.println("id : "+ id +  "GB is inited: +++  "  + genesisBlock);
+        System.out.println("id : "+ id + "GB is Done----- ---- ----  --" );
         return genesisBlock;
+    }
+
+    private String computeHashForGB(Block gb) {
+        String dataForHash = gb.getData();
+        return DigestUtils.sha256Hex(dataForHash.getBytes());
+    }
+
+    private String computePreHashForGB() {
+        String dummy = "This is previous hash for GB!";
+        return DigestUtils.sha256Hex(dummy);
     }
 
 
@@ -59,11 +84,18 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public byte[] createNewBlock(String data) {
+        System.out.println("Start create new block --- ");
+        System.out.println("data is : " + data);
         String preHash =  getLastBlock().getHash();
+        System.out.println("previuous hash for new block is  : " + preHash);
         Block newBlock = new Block(preHash, data, System.currentTimeMillis(), this.difficulty);
         newBlock.computePOW();
+        newBlock.setIndex(getLastBlock().getIndex() + 1);
+        this.newBlock = newBlock;
         byte[] newBlockByte = newBlock.toString().getBytes();
+        System.out.println(" new block byte --- " );
         this.newBlockByte = newBlockByte;
+        System.out.println(" new block is done --- ");
         return newBlockByte;
     }
 
@@ -72,16 +104,22 @@ public class BlockChain implements BlockChainBase {
     // inside the broadcastNewBlock method in your BlockChainBase implementation,
     // you need to call the node’s broadcastNewBlockToPeer method
     public boolean broadcastNewBlock() {
+        System.out.println(" start broadcaset to peers --- ");
         for(int i = 0; i < node.getPeerNumber(); i++) {
             if( i == this.id) continue;
             try {
                 if(!node.broadcastNewBlockToPeer(i, this.newBlockByte)) {
                     return false;
                 }
+                System.out.println(" start broadcaset to peers ---  get false from peers");
             }catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
+        System.out.println(" all aggree on this block  --- ");
+
+        this.blocks.add(this.newBlock);
+
         return true;
     }
 
@@ -104,6 +142,7 @@ public class BlockChain implements BlockChainBase {
     @Override
     // call getBlockChainDataFromPeer inside node class.
     public void downloadBlockchain() {
+        System.out.println(" call donwload blockchain --- ");
         String[] longestBlockChain = new String[0];
         int maxLen = 0;
         for(int i = 0; i < node.getPeerNumber(); i++) {
@@ -111,14 +150,19 @@ public class BlockChain implements BlockChainBase {
             try {
                 byte[] curByte = node.getBlockChainDataFromPeer(i);
                 String curString = new String(curByte);
+                System.out.println(" chain for peer --- " + i + "--" + curString);
                 String[] peerBlocks = curString.split("@");
                 if(peerBlocks.length > maxLen) {
                     maxLen = peerBlocks.length;
                     longestBlockChain = peerBlocks;
+                    System.out.println(" longest bc when > --- " + maxLen);
                 }else if(peerBlocks.length == maxLen) {
                     Block lastBlockForCurMax = Block.fromString(longestBlockChain[longestBlockChain.length - 1]);
                     Block lastBlockForPeer = Block.fromString(peerBlocks[peerBlocks.length - 1]);
                     // we want to choose the block containing the earliest timestamp.
+                    System.out.println(" longest bc ==  --- " + maxLen);
+                    System.out.println(" ts for currentMax ==  --- " + lastBlockForCurMax.getTimestamp());
+                    System.out.println(" ts for peer ==  --- " + lastBlockForPeer.getTimestamp());
                     if(lastBlockForCurMax.getTimestamp()
                             > lastBlockForPeer.getTimestamp()) {
                         longestBlockChain = peerBlocks;
@@ -128,9 +172,11 @@ public class BlockChain implements BlockChainBase {
                 e.printStackTrace();
             }
         }
+        System.out.println(" loop for broadcast down --- ");
 
         List<Block> curBlocks = new ArrayList<>();
         for(String s : longestBlockChain) {
+            System.out.println(" string for data from longest peer --- " + s);
             curBlocks.add(Block.fromString(s));
         }
         this.blocks = curBlocks;
@@ -143,8 +189,13 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public boolean isValidNewBlock(Block newBlock, Block prevBlock) {
+        System.out.println(" check ing validate in isValidateNewBlock  " );
         if(!newBlock.getPreviousHash().equals(prevBlock.getHash())
-                || new BigInteger(newBlock.getPow().getHash(), 16).compareTo(target) != -1) {
+                || new BigInteger(newBlock.getHash(), 16).compareTo(target) != -1
+                || newBlock.getIndex() != prevBlock.getIndex() + 1) {
+            System.out.println(" newBlock.getPreviousHash()  " + newBlock.getPreviousHash() + "prevBlock.getHash()  " + prevBlock.getHash() );
+            System.out.println("new BigInteger(newBlock.getPow().getHash(), 16).compareTo(target)  " + new BigInteger(newBlock.getHash(), 16).compareTo(target) );
+            System.out.println("newBlock.getIndex() " + newBlock.getIndex() + "prevBlock.getIndex()  " + prevBlock.getIndex());
             return false;
         }
         return true;
@@ -152,7 +203,7 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public Block getLastBlock() {
-        if(this.getBlockChainLength() < 1) return null;
+//        if(this.getBlockChainLength() < 1) return null;
 
         return this.getBlocks().get(getBlockChainLength() - 1);
     }

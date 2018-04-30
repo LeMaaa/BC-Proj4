@@ -124,11 +124,11 @@ public class Node implements MessageHandling {
     @Override
     public GetStateReply getState() {
         synchronized (lock) {
-            System.out.println(this.blockChainManager);
+//            System.out.println("this bc mamanger " + this.blockChainManager);
             int l = blockChainManager.getBlockChainLength();
             System.out.println("length for node : ---" + l);
             Block last = blockChainManager.getLastBlock();
-            System.out.println("last block" + last);
+            System.out.println("last block : -- " + last);
             return new GetStateReply(l, last.getHash());
         }
     }

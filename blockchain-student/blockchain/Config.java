@@ -94,12 +94,13 @@ public class Config extends UnicastRemoteObject implements Remote {
     }
 
     public void waitUntilAllRegister() {
+        System.out.println("here is wait function");
 
         int numRegistered = 0;
         while( numRegistered != this.numServers ) {
 
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 cleanup();
