@@ -160,9 +160,9 @@ public class BlockChain implements BlockChainBase {
                     Block lastBlockForCurMax = Block.fromString(longestBlockChain[longestBlockChain.length - 1]);
                     Block lastBlockForPeer = Block.fromString(peerBlocks[peerBlocks.length - 1]);
                     // we want to choose the block containing the earliest timestamp.
-                    System.out.println(" longest bc ==  --- " + maxLen);
-                    System.out.println(" ts for currentMax ==  --- " + lastBlockForCurMax.getTimestamp());
-                    System.out.println(" ts for peer ==  --- " + lastBlockForPeer.getTimestamp());
+//                    System.out.println(" longest bc ==  --- " + maxLen);
+//                    System.out.println(" ts for currentMax ==  --- " + lastBlockForCurMax.getTimestamp());
+//                    System.out.println(" ts for peer ==  --- " + lastBlockForPeer.getTimestamp());
                     if(lastBlockForCurMax.getTimestamp()
                             > lastBlockForPeer.getTimestamp()) {
                         longestBlockChain = peerBlocks;
@@ -193,9 +193,6 @@ public class BlockChain implements BlockChainBase {
         if(!newBlock.getPreviousHash().equals(prevBlock.getHash())
                 || new BigInteger(newBlock.getHash(), 16).compareTo(target) != -1
                 || newBlock.getIndex() != prevBlock.getIndex() + 1) {
-            System.out.println(" newBlock.getPreviousHash()  " + newBlock.getPreviousHash() + "prevBlock.getHash()  " + prevBlock.getHash() );
-            System.out.println("new BigInteger(newBlock.getPow().getHash(), 16).compareTo(target)  " + new BigInteger(newBlock.getHash(), 16).compareTo(target) );
-            System.out.println("newBlock.getIndex() " + newBlock.getIndex() + "prevBlock.getIndex()  " + prevBlock.getIndex());
             return false;
         }
         return true;

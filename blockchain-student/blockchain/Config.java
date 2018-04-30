@@ -100,7 +100,7 @@ public class Config extends UnicastRemoteObject implements Remote {
         while( numRegistered != this.numServers ) {
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 cleanup();
