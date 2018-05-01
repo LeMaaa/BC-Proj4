@@ -71,7 +71,7 @@ public interface BlockChainBase {
 
     /**
      * Get the length of the block chain
-     * @return the sie of blockchain
+     * @return the size of blockchain
      */
     int getBlockChainLength();
 }

@@ -125,6 +125,9 @@ public class Node implements MessageHandling {
     public GetStateReply getState() {
         synchronized (lock) {
 //            System.out.println("this bc mamanger " + this.blockChainManager);
+            if (blockChainManager == null) {
+                System.out.println("block chain manager is null lol");
+            }
             int l = blockChainManager.getBlockChainLength();
             System.out.println("length for node : ---" + l);
             Block last = blockChainManager.getLastBlock();
