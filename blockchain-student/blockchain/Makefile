@@ -4,7 +4,7 @@ ifeq ($(OS),Windows_NT)
 	javac -Xlint -g *.java
 else
 	# assume Linux
-	javac -Xlint -g *.java
+	javac -Xlint -g -cp ".:hash/commons-codec-1.11.jar:" *.java
 endif
 
 clean:
