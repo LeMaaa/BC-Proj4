@@ -42,7 +42,7 @@ public class BlockChain implements BlockChainBase {
     @Override
     public boolean addBlock(Block block) {
         System.out.println("Start add new block  --- ");
-        if(isValidNewBlock(block, this.getLastBlock())){
+        if(isValidNewBlock(block, this.getLastBlock())) {
             System.out.println("new block is validate --- ");
             this.blocks.add(block);
             return true;
@@ -52,7 +52,7 @@ public class BlockChain implements BlockChainBase {
     }
 
     @Override
-    public synchronized Block createGenesisBlock() {
+    public Block createGenesisBlock() {
         System.out.println("start to init  GB --" );
         String data = "This is Genesis Block!";
         String preHash = computePreHashForGB();
@@ -106,13 +106,13 @@ public class BlockChain implements BlockChainBase {
     public boolean broadcastNewBlock() {
         System.out.println(" start broadcaset to peers --- ");
         for(int i = 0; i < node.getPeerNumber(); i++) {
-            if( i == this.id) continue;
+            if(i == this.id) continue;
             try {
                 if(!node.broadcastNewBlockToPeer(i, this.newBlockByte)) {
                     return false;
                 }
                 System.out.println(" start broadcaset to peers ---  get false from peers");
-            }catch (RemoteException e) {
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
@@ -152,23 +152,21 @@ public class BlockChain implements BlockChainBase {
                 String curString = new String(curByte);
                 System.out.println(" chain for peer --- " + i + "--" + curString);
                 String[] peerBlocks = curString.split("@");
-                if(peerBlocks.length > maxLen) {
+                if (peerBlocks.length > maxLen) {
                     maxLen = peerBlocks.length;
                     longestBlockChain = peerBlocks;
                     System.out.println(" longest bc when > --- " + maxLen);
-                }else if(peerBlocks.length == maxLen) {
+                } else if(peerBlocks.length == maxLen) {
                     Block lastBlockForCurMax = Block.fromString(longestBlockChain[longestBlockChain.length - 1]);
                     Block lastBlockForPeer = Block.fromString(peerBlocks[peerBlocks.length - 1]);
+
                     // we want to choose the block containing the earliest timestamp.
-//                    System.out.println(" longest bc ==  --- " + maxLen);
-//                    System.out.println(" ts for currentMax ==  --- " + lastBlockForCurMax.getTimestamp());
-//                    System.out.println(" ts for peer ==  --- " + lastBlockForPeer.getTimestamp());
                     if(lastBlockForCurMax.getTimestamp()
                             > lastBlockForPeer.getTimestamp()) {
                         longestBlockChain = peerBlocks;
                     }
                 }
-            }catch (RemoteException e) {
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
@@ -200,12 +198,10 @@ public class BlockChain implements BlockChainBase {
 
     @Override
     public Block getLastBlock() {
-//        if(this.getBlockChainLength() < 1) return null;
-
         return this.getBlocks().get(getBlockChainLength() - 1);
     }
 
-    private List<Block> getBlocks() { return this.blocks;}
+    private List<Block> getBlocks() { return this.blocks; }
 
     public Block getGenesisBlock() {return this.genesisBlock;}
 

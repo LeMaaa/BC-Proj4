@@ -22,11 +22,12 @@ public class Node implements MessageHandling {
      */
     public Node(int port, int id, int num_peers) {
         this.id = id;
-        lib = new TransportLib(port, id, this);
         wallet = 0;
         this.num_peers = num_peers;
+        // first construct block chain manager, and the register to transport lib
+        // because construction takes time...
         this.blockChainManager = new BlockChain(id, this, 20);
-        //TODO: instantiate your blockchain implementation and set the difficulty to 20.
+        lib = new TransportLib(port, id, this);
     }
 
     /**
@@ -124,10 +125,7 @@ public class Node implements MessageHandling {
     @Override
     public GetStateReply getState() {
         synchronized (lock) {
-//            System.out.println("this bc mamanger " + this.blockChainManager);
-            if (blockChainManager == null) {
-                System.out.println("block chain manager is null lol");
-            }
+
             int l = blockChainManager.getBlockChainLength();
             System.out.println("length for node : ---" + l);
             Block last = blockChainManager.getLastBlock();

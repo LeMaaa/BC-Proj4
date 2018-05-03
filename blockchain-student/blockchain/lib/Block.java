@@ -131,13 +131,7 @@ public class Block implements Serializable{
 
 
     public static Block fromString(String s){
-
         String[] arr = s.split("#");
-//        System.out.println(arr);
-//        for(String a : arr) {
-//            System.out.println("string in arr : ---" + a);
-//
-//        }
         Block block = new Block(arr[0], arr[1], arr[2], Long.parseLong(arr[3]), Integer.parseInt(arr[4]), Integer.parseInt(arr[5]));
         block.setIndex(Integer.parseInt(arr[6]));
         return block;
